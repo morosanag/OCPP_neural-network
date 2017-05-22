@@ -260,7 +260,7 @@ OcppMessage{time=1486148586000, stationId=RENOVA_0013, requestType=BootNotificat
 OcppMessage{time=1486148586000, stationId=SERVER, requestType=null, messageType=3, messageId=1, messageContent={"currentTime":"2017-02-03T09:03:06Z","heartbeatInterval":650,"status":"Accepted"}}
 OcppMessage{time=1486148597000, stationId=RENOVA_0013, requestType=StatusNotification, messageType=2, messageId=2, messageContent={"connectorId":2,"errorCode":"NoError","status":"Available"}}
 OcppMessage{time=1486148597000, stationId=SERVER, requestType=null, messageType=3, messageId=2, messageContent={}}
-OcppMessage{time=1486148597000, stationId=RENOVA_0013, requestType=StatusNotification, messageType=2, messageId=3, messageContent={"connectorId":1,"errorCode":"NoError","status":"Available"}}
+OcppMessage{time=1486148597000, stationId=RENOVA_0013, requestType=MeterValues, messageType=2, messageId=3, messageContent={"connectorId":1,"errorCode":"NoError","status":"Available"}}
 OcppMessage{time=1486148597000, stationId=SERVER, requestType=null, messageType=3, messageId=3, messageContent={}}
 OcppMessage{time=1486149269000, stationId=RENOVA_0013, requestType=BootNotification, messageType=2, messageId=1, messageContent={"chargePointModel":"EVe-dual","iccid":"8940030516823798044","chargePointVendor":"Alfen BV","chargePointSerialNumber":"50793R002","chargeBoxSerialNumber":"RENOVA_0013","imsi":"226031820379804","firmwareVersion":"#1:203-1438B24#2:200#3:203B24#4:203B24"}}
 OcppMessage{time=1486149269000, stationId=SERVER, requestType=null, messageType=3, messageId=1, messageContent={"currentTime":"2017-02-03T09:14:29Z","heartbeatInterval":650,"status":"Accepted"}}

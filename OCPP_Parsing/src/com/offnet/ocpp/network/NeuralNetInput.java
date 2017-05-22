@@ -5,16 +5,21 @@
  */
 package com.offnet.ocpp.network;
 
-import com.offnet.ocpp.bean.OcppPairComparator;
-import com.offnet.ocpp.parsing.LogReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.offnet.ocpp.bean.RequestResponsePair;
+
 import org.json.JSONException;
+
+import com.offnet.ocpp.bean.OcppPairComparator;
+import com.offnet.ocpp.bean.RequestResponsePair;
+import com.offnet.ocpp.general.RequestType;
+import com.offnet.ocpp.parsing.LogReader;
 
 /**
  *
@@ -25,19 +30,24 @@ public class NeuralNetInput {
     // input values
     private double lastTimeRequestPerc;
     private double lastTimeStationRequestPerc;
-    private double requestPriority;
+    private double requestPriority;// sample 
     
     // target values
     private double target;
+    
+    // last N requests
+    private LinkedList<RequestType> requestSequence;
     
     // constants
     private static final long MAX_STATION_TIME = 10 * 60 * 1000; // 10 minutes
     private static final long MAX_STATION_REQUEST_TIME = 10 * 60 * 1000; // 10 minutes
     
     // neural network constants
-    public static final int INPUT_SIZE = 3;
+    public static final int INPUT_SIZE = 5;
     public static final int HIDDEN_SIZE = 3;
     public static final int OUTPUT_SIZE = 1;
+    
+    public static HashMap<LinkedList<RequestType>, Double> sequencesMap = new HashMap<LinkedList<RequestType>, Double>();
     
     static int count;
     static double sum;
@@ -97,6 +107,17 @@ public class NeuralNetInput {
     
     }
     
+    public double getSequenceIndex(LinkedList<RequestType> sequence) {
+    	if(sequencesMap.containsKey(sequence)) {
+    		return sequencesMap.get(sequence);
+    	}
+    	double value = Math.random();
+    	sequencesMap.put(sequence, value);
+    	
+    	return value;
+    	
+    }
+    
     public double getLastTimeRequestPerc() {
         return lastTimeRequestPerc;
     }
@@ -129,9 +150,18 @@ public class NeuralNetInput {
         this.target = target;
     }
 
-    @Override
-    public String toString() {
-        return "NeuralNetInput{" + "lastTimeRequestPerc=" + lastTimeRequestPerc + ", lastTimeStationRequestPerc=" + lastTimeStationRequestPerc + ", requestPriority=" + requestPriority + ", target=" + target + '}';
-    }
-    
+    public LinkedList<RequestType> getRequestSequence() {
+		return requestSequence;
+	}
+
+	public void setRequestSequence(LinkedList<RequestType> requestSequence) {
+		this.requestSequence = requestSequence;
+	}
+
+	@Override
+	public String toString() {
+		return "NeuralNetInput [lastTimeRequestPerc=" + lastTimeRequestPerc + ", lastTimeStationRequestPerc="
+				+ lastTimeStationRequestPerc + ", requestPriority=" + requestPriority + ", target=" + target
+				+ ", requestSequence=" + requestSequence + "]";
+	}    
 }

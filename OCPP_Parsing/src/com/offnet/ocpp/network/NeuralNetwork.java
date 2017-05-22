@@ -332,8 +332,17 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             
             inputs[0] = neuralNetInput.getLastTimeRequestPerc();
             inputs[1] = neuralNetInput.getLastTimeStationRequestPerc();
-            inputs[2] = neuralNetInput.getRequestPriority();
-                    
+            inputs[2] = neuralNetInput.getSequenceIndex(neuralNetInput.getRequestSequence());
+            
+            /*for(int i = 0; i < neuralNetInput.getRequestSequence().size(); i++) {
+            	inputs[2 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
+            }*/
+            
+            for(int i = 0; i < inputs.length; i++) {
+            	System.out.print(inputs[i] + " ");
+            }
+            System.out.println();
+            
             targets[0] = neuralNetInput.getTarget();
             
            // System.out.println("inputs:");

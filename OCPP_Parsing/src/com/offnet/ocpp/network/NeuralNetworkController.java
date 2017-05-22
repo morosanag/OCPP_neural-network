@@ -5,8 +5,6 @@
  */
 package com.offnet.ocpp.network;
 
-import com.offnet.ocpp.general.Constants;
-import com.offnet.ocpp.parsing.LogReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -14,11 +12,17 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
-import com.offnet.ocpp.network.NeuralNetwork;
+
 import com.offnet.ocpp.bean.RequestResponsePair;
 import com.offnet.ocpp.bean.StationRequestTypePair;
+import com.offnet.ocpp.general.Constants;
+import com.offnet.ocpp.general.RequestType;
+import com.offnet.ocpp.parsing.LogReader;
 
 /**
  *
@@ -29,31 +33,57 @@ public class NeuralNetworkController {
     private LogReader logReader;
     private Map<StationRequestTypePair, RequestResponsePair> lastRequestTypeStation;
     private Map<String, Long> lastRequestStation;
+    private HashMap<String, LinkedList<RequestType>> lastSeqRequestsStation;
     private NeuralNetwork neuralNetwork = new NeuralNetwork();
     
     private Writer writerAll;
     private Writer writerFiltered;
     
-    private final String chargePoint = "RENOVA_0007";
-    //private final String chargePoint = "LMS-11702190";
+    //private final String chargePoint = "RENOVA_0007";
+    private final String chargePoint = "LMS-11702190";
     
     public NeuralNetworkController(String urlString) throws UnsupportedEncodingException, FileNotFoundException {
         this.logReader = new LogReader(urlString);
         lastRequestTypeStation = new HashMap<StationRequestTypePair, RequestResponsePair>();
         lastRequestStation = new HashMap<String, Long>();
+        lastSeqRequestsStation = new HashMap<String, LinkedList<RequestType>>();
         
-        writerAll = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_all.txt"), "utf-8"));
-        writerFiltered = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_filtered.txt"), "utf-8"));
+        createNewLogs();
         
         initialize();
-        
-        
+
+    }
+    
+    public void createNewLogs() throws UnsupportedEncodingException, FileNotFoundException {
+    	
+    	Date date = new Date();
+    	Timestamp timestamp = new Timestamp(date.getTime());
+
+    	writerAll = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_all_" + timestamp.getTime() + ".txt"), "utf-8"));
+        writerFiltered = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_filtered_" + timestamp.getTime() + ".txt"), "utf-8"));
+    	
+    }
+    
+    public void testSet(String url) throws IOException {
+    	this.logReader = new LogReader(url);
+    	this.logReader.read();
+    	
+        System.out.println("size: " + this.logReader.getStationIds().size());
+        this.computeDifferences(false);
+        this.writerAll.close();
+        this.writerFiltered.close();
     }
     
     public static void main(String [] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {     
-        NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-01-2017.log");
+        NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-03-2017.log");
         networkController.computeDifferences(true);
-        networkController.logReader = new LogReader("file:///var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result.log");
+        
+        networkController.testSet("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
+        //networkController.createNewLogs();
+       // networkController.testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
+        
+        /*networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
+        
         //networkController.logReader = new LogReader("file:///var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result.log");
         //networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
         networkController.logReader.read();
@@ -61,6 +91,14 @@ public class NeuralNetworkController {
         networkController.computeDifferences(false);
         networkController.writerAll.close();
         networkController.writerFiltered.close();
+        */
+      /*  networkController.logReader = new LogReader("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
+        networkController.logReader.read();
+        networkController.createNewLogs();
+        networkController.computeDifferences(false);
+        networkController.writerAll.close();
+        networkController.writerFiltered.close();
+        */
     }
     
     public void initialize() {
@@ -78,7 +116,7 @@ public class NeuralNetworkController {
         while(!logReader.getOcppLogPairs().isEmpty()) {
             
             RequestResponsePair currentPair = logReader.getOcppLogPairs().removeLast();
-            if(!isLearning && !currentPair.getRequest().getStationId().equals(chargePoint))  {
+            if(!isLearning && currentPair.getRequest().getStationId().equals(chargePoint))  {
                 writeToFile(currentPair, writerAll);
             }
             
@@ -93,10 +131,29 @@ public class NeuralNetworkController {
                 stationTimeDiff = Math.abs(currentPair.getRequest().getTime() - lastRequestTime);
                 //System.out.println("ok: " + currentPair.getRequest().getTime() + " - " + lastRequestTime + " = " + stationTimeDiff);
                 lastRequestStation.put(currentPair.getRequest().getStationId(), currentPair.getRequest().getTime());
+                
+                LinkedList<RequestType> seqRequests = lastSeqRequestsStation.get(currentPair.getRequest().getStationId());
+                if(seqRequests.size() >= 5) {
+                	seqRequests.removeLast();
+                }
+                seqRequests.addFirst(currentPair.getRequest().getRequestType());
+                lastSeqRequestsStation.put(currentPair.getRequest().getStationId(), seqRequests);
+                
+                if(currentPair.getRequest().getStationId().equals(chargePoint)) {
+                //	System.out.println(lastSeqRequestsStation.get(currentPair.getRequest().getStationId()));
+                }
+                
             } else {
                 stationTimeDiff = currentPair.getRequest().getTime();
                 lastRequestStation.put(currentPair.getRequest().getStationId(), stationTimeDiff);
+                
+                LinkedList<RequestType> seqRequests = new LinkedList<RequestType>();
+                seqRequests.addFirst(currentPair.getRequest().getRequestType());
+                lastSeqRequestsStation.put(currentPair.getRequest().getStationId(), seqRequests);
+                
             }
+            
+            
             
             // get last time diff from the last request having the same time from the same station
             StationRequestTypePair currentStationRequestTypePair = new StationRequestTypePair(currentPair.getRequest().getRequestType(), 
@@ -104,7 +161,7 @@ public class NeuralNetworkController {
             if(lastRequestTypeStation.containsKey(currentStationRequestTypePair)) {
                 RequestResponsePair lastRequestResponsePair = lastRequestTypeStation.get(currentStationRequestTypePair);
                 NeuralNetInput neuralNetInput = new NeuralNetInput(lastRequestResponsePair, currentPair, stationTimeDiff, logReader);
-                
+                neuralNetInput.setRequestSequence(lastSeqRequestsStation.get(currentPair.getRequest().getStationId()));
                 
                 //System.out.println(neuralNetInput.getLastTimeRequestPerc() + " " + neuralNetInput.getLastTimeStationRequestPerc() + " " + neuralNetInput.getRequestPriority());
                     
@@ -125,17 +182,23 @@ public class NeuralNetworkController {
                     long start = (long) 1483318133000.0;
                     
                     if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
-                        System.out.println((lastRequestResponsePair.getRequest().getTime() - start) + ", " + neuralNetInput.getTarget());
+                    //    System.out.println((lastRequestResponsePair.getRequest().getTime() - start) + ", " + neuralNetInput.getTarget());
                     }
+                    if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
+                    	System.out.println(lastRequestResponsePair.getRequest().getRequestType().getValue() + " " + neuralNetInput.getTarget());
+                    } /*else if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
+                    	System.out.println("+++++++++: " + neuralNetInput.getTarget());
+                        	
+                    }*/
                     
                     if(neuralNetInput.getTarget() > Constants.THRESHOLD) {
-                        neuralNetwork.processNode(neuralNetInput);
+                    //    neuralNetwork.processNode(neuralNetInput);
                     //    if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
                     //        System.out.println("2: " + lastRequestResponsePair.getRequest().getStationId() + " " + lastRequestResponsePair.getRequest().getTime() + ":\t" + neuralNetInput.getTarget());
                     //    }
                     }
                     
-                    if(neuralNetInput.getTarget() > Constants.THRESHOLD && !currentPair.getRequest().getStationId().equals(chargePoint)) {
+                    if(neuralNetInput.getTarget() < Constants.THRESHOLD && currentPair.getRequest().getStationId().equals(chargePoint)) {
                         writeToFile(currentPair, writerFiltered);
                     }
                 }
@@ -143,7 +206,7 @@ public class NeuralNetworkController {
                 
             } else {
                 lastRequestTypeStation.put(currentStationRequestTypePair, currentPair);
-                if(!isLearning && !currentPair.getRequest().getStationId().equals(chargePoint)) {
+                if(!isLearning && currentPair.getRequest().getStationId().equals(chargePoint)) {
                     writeToFile(currentPair, writerFiltered);
                 }
             }
