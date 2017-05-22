@@ -11,17 +11,17 @@ package com.offnet.ocpp.general;
  */
 public enum RequestType {
  
-    Authorize ("Authorize", 0.5),
+    Authorize ("Authorize", 1.0),
     StartTransaction ("StartTransaction", 0.5),
-    StopTransaction("StopTransaction", 0.5),
-    Heartbeat("Heartbeat", 0.5),
-    HeartBeat("Heartbeat", 0.5),
-    MeterValues("MeterValues", 0.5),
-    BootNotification("BootNotification", 0.5),
-    StatusNotification("StatusNotification", 0.5),
-    FirmwareStatusNotification("FirmwareStatusNotification", 0.5),
-    DiagnosticsStatusNotification("DiagnosticsStatusNotification", 0.5),
-    DataTransfer("DataTransfer", 0.5);
+    StopTransaction("StopTransaction", 0.8),
+    Heartbeat("Heartbeat", 0.3),
+    HeartBeat("Heartbeat", 0.3),
+    MeterValues("MeterValues", 0.7),
+    BootNotification("BootNotification", 0.4),
+    StatusNotification("StatusNotification", 0.1),
+    FirmwareStatusNotification("FirmwareStatusNotification", 0.2),
+    DiagnosticsStatusNotification("DiagnosticsStatusNotification", 0.6),
+    DataTransfer("DataTransfer", 0.9);
     /*UnlockConnector("UnlockConnector"),
     Reset("Reset"),
     ChangeAvailability("ChangeAvailability"),
