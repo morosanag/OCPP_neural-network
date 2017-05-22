@@ -25,7 +25,7 @@ public class NeuralNetInput {
     // input values
     private double lastTimeRequestPerc;
     private double lastTimeStationRequestPerc;
-    private double requestPriority;
+    private double requestPriority;// sample 
     
     // target values
     private double target;
