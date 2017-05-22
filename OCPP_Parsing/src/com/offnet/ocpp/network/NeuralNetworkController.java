@@ -40,7 +40,7 @@ public class NeuralNetworkController {
     private Writer writerFiltered;
     
     //private final String chargePoint = "RENOVA_0007";
-    private final String chargePoint = "RENOVA_0013";
+    private final String chargePoint = "LMS-11702190";
     
     public NeuralNetworkController(String urlString) throws UnsupportedEncodingException, FileNotFoundException {
         this.logReader = new LogReader(urlString);
@@ -64,10 +64,25 @@ public class NeuralNetworkController {
     	
     }
     
+    public void testSet(String url) throws IOException {
+    	this.logReader = new LogReader(url);
+    	this.logReader.read();
+    	
+        System.out.println("size: " + this.logReader.getStationIds().size());
+        this.computeDifferences(false);
+        this.writerAll.close();
+        this.writerFiltered.close();
+    }
+    
     public static void main(String [] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {     
         NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-03-2017.log");
         networkController.computeDifferences(true);
-        networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
+        
+        networkController.testSet("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
+        //networkController.createNewLogs();
+       // networkController.testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
+        
+        /*networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
         
         //networkController.logReader = new LogReader("file:///var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result.log");
         //networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
@@ -76,15 +91,14 @@ public class NeuralNetworkController {
         networkController.computeDifferences(false);
         networkController.writerAll.close();
         networkController.writerFiltered.close();
-        
-        
-        networkController.logReader = new LogReader("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
+        */
+      /*  networkController.logReader = new LogReader("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
         networkController.logReader.read();
         networkController.createNewLogs();
         networkController.computeDifferences(false);
         networkController.writerAll.close();
         networkController.writerFiltered.close();
-        
+        */
     }
     
     public void initialize() {
@@ -119,7 +133,7 @@ public class NeuralNetworkController {
                 lastRequestStation.put(currentPair.getRequest().getStationId(), currentPair.getRequest().getTime());
                 
                 LinkedList<RequestType> seqRequests = lastSeqRequestsStation.get(currentPair.getRequest().getStationId());
-                if(seqRequests.size() >= 3) {
+                if(seqRequests.size() >= 5) {
                 	seqRequests.removeLast();
                 }
                 seqRequests.addFirst(currentPair.getRequest().getRequestType());
