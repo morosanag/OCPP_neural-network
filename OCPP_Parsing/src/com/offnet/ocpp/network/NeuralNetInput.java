@@ -52,6 +52,10 @@ public class NeuralNetInput {
     static int count;
     static double sum;
     
+    public NeuralNetInput() {
+        
+    }
+    
     public NeuralNetInput(RequestResponsePair lastPair, RequestResponsePair currentPair, long lastTimeRequest, LogReader logReader) {
         OcppPairComparator ocppPairComparator = new OcppPairComparator(lastPair, currentPair);
         target = ocppPairComparator.getSimilarityPercentage() * 10;

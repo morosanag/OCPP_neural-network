@@ -15,13 +15,13 @@ public enum RequestType {
     StartTransaction ("StartTransaction", 0.5),
     StopTransaction("StopTransaction", 0.8),
     Heartbeat("Heartbeat", 0.3),
-    HeartBeat("Heartbeat", 0.3),
+ //   HeartBeat("Heartbeat", 0.3),
     MeterValues("MeterValues", 0.7),
     BootNotification("BootNotification", 0.4),
     StatusNotification("StatusNotification", 0.1),
-    FirmwareStatusNotification("FirmwareStatusNotification", 0.2),
-    DiagnosticsStatusNotification("DiagnosticsStatusNotification", 0.6),
-    DataTransfer("DataTransfer", 0.9);
+ //   FirmwareStatusNotification("FirmwareStatusNotification", 0.2),
+ //   DiagnosticsStatusNotification("DiagnosticsStatusNotification", 0.6),
+ //   DataTransfer("DataTransfer", 0.9);
     /*UnlockConnector("UnlockConnector"),
     Reset("Reset"),
     ChangeAvailability("ChangeAvailability"),

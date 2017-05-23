@@ -20,8 +20,8 @@ public class LogWriter {
     
     private static final String ORIGINAL_FILENAME = "http://serverstore.ro/OCPP_Logs/ocpp_rest_02-10-2017.log";
     private static final String BOT_FILENAME = "file:///var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest.log";
-    private static final String RESULT_FILENAME = "/var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result.log";
-    private static final int BOT_STEP = 20;
+    private static final String RESULT_FILENAME = "/var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result2.log";
+    private static final int BOT_STEP = 10;
     
     private List<String> originalLog = new ArrayList<String>();
     private List<String> botLog = new ArrayList<String>();
