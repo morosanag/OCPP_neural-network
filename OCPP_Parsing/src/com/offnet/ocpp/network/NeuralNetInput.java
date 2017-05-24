@@ -30,7 +30,7 @@ public class NeuralNetInput {
     // input values
     private double lastTimeRequestPerc;
     private double lastTimeStationRequestPerc;
-    private double requestPriority;// sample 
+    //private double requestPriority;// sample 
     
     // target values
     private double target;
@@ -70,34 +70,34 @@ public class NeuralNetInput {
             count++;
             sum += target;
             
-        //    System.out.println("#" + target + " - " + currentPair.getResponse().isErrorResponse());
+        //    //System.out.println("#" + target + " - " + currentPair.getResponse().isErrorResponse());
         } catch (JSONException ex) {
             Logger.getLogger(NeuralNetInput.class.getName()).log(Level.SEVERE, null, ex);
         }
-       // System.out.println(sum + " " + count);
+       // //System.out.println(sum + " " + count);
        
        
        
-       requestPriority = percentageValue(currentPair.getRequest().getStationId(), logReader.getStationIds());
-       //System.out.println("requestPriority: " + requestPriority);
+       //requestPriority = percentageValue(currentPair.getRequest().getStationId(), logReader.getStationIds());
+       ////System.out.println("requestPriority: " + requestPriority);
        //requestPriority = currentPair.getRequest().getRequestType().getPriority();
-       //System.out.println("lastTimeRequest: " +lastTimeRequest);
-       // System.out.println(lastTimeRequest + " " +MAX_STATION_TIME );
+       ////System.out.println("lastTimeRequest: " +lastTimeRequest);
+       // //System.out.println(lastTimeRequest + " " +MAX_STATION_TIME );
         
-      // System.out.println("--------------------------");
-     //  System.out.println(lastPair);
-     //  System.out.println(currentPair);
+      // //System.out.println("--------------------------");
+     //  //System.out.println(lastPair);
+     //  //System.out.println(currentPair);
        
         
         lastTimeRequestPerc = lastTimeRequest > MAX_STATION_TIME ? 1 : ((double)lastTimeRequest / MAX_STATION_TIME);
         
         long timeDiff = Math.abs(currentPair.getRequest().getTime() - lastPair.getRequest().getTime());
-       // System.out.println(timeDiff);
+       // //System.out.println(timeDiff);
         lastTimeStationRequestPerc = timeDiff > MAX_STATION_REQUEST_TIME ? 1 : ((double)timeDiff / MAX_STATION_REQUEST_TIME);           
         
         
-        //System.out.println("a: " + lastTimeRequest + " - " + MAX_STATION_TIME);
-        //System.out.println("b: " + timeDiff + " - " + MAX_STATION_REQUEST_TIME);
+        ////System.out.println("a: " + lastTimeRequest + " - " + MAX_STATION_TIME);
+        ////System.out.println("b: " + timeDiff + " - " + MAX_STATION_REQUEST_TIME);
     }
 
     public static double percentageValue(String value, Set<String> arr) {
@@ -138,13 +138,13 @@ public class NeuralNetInput {
         this.lastTimeStationRequestPerc = lastTimeStationRequestPerc;
     }
 
-    public double getRequestPriority() {
+    /*public double getRequestPriority() {
         return requestPriority;
     }
 
     public void setRequestPriority(double requestPriority) {
         this.requestPriority = requestPriority;
-    }
+    }*/
 
     public double getTarget() {
         return target;
@@ -157,7 +157,7 @@ public class NeuralNetInput {
     public LinkedList<RequestType> getRequestSequence() {
 		return requestSequence;
 	}
-
+ 
 	public void setRequestSequence(LinkedList<RequestType> requestSequence) {
 		this.requestSequence = requestSequence;
 	}
@@ -165,7 +165,7 @@ public class NeuralNetInput {
 	@Override
 	public String toString() {
 		return "NeuralNetInput [lastTimeRequestPerc=" + lastTimeRequestPerc + ", lastTimeStationRequestPerc="
-				+ lastTimeStationRequestPerc + ", requestPriority=" + requestPriority + ", target=" + target
+				+ lastTimeStationRequestPerc + ", target=" + target
 				+ ", requestSequence=" + requestSequence + "]";
 	}    
 }

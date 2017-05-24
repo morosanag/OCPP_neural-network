@@ -13,9 +13,11 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.offnet.ocpp.bean.RequestResponsePair;
@@ -43,8 +45,13 @@ public class NeuralNetworkController {
     private Writer writerAll;
     private Writer writerFiltered;
     
-    //private final String chargePoint = "RENOVA_0007";
-    private final String chargePoint = "BMX LMS-11702190";
+    public static double best_threshold = 0;
+    public static double best_accuracy = 0;
+    
+    public static int count_BMX_hearbeats = 0;
+    
+    private final String chargePoint = "BMX";
+    //private final String chargePoint = "LMS-11702190";
     
     public NeuralNetworkController(String urlString) throws UnsupportedEncodingException, FileNotFoundException {
         this.logReader = new LogReader(urlString);
@@ -66,8 +73,12 @@ public class NeuralNetworkController {
     	Date date = new Date();
     	Timestamp timestamp = new Timestamp(date.getTime());
 
-    	writerAll = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_all_" + timestamp.getTime() + ".txt"), "utf-8"));
-        writerFiltered = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_filtered_" + timestamp.getTime() + ".txt"), "utf-8"));
+    	writerAll = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_all" + ".txt"), "utf-8"));
+        writerFiltered = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_filtered" + ".txt"), "utf-8"));
+        
+    	
+//    	writerAll = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_all_" + timestamp.getTime() + ".txt"), "utf-8"));
+//        writerFiltered = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("traffic_filtered_" + timestamp.getTime() + ".txt"), "utf-8"));
     	
     }
     
@@ -75,46 +86,119 @@ public class NeuralNetworkController {
     	this.logReader = new LogReader(url);
     	this.logReader.read();
     	
-        System.out.println("size: " + this.logReader.getStationIds().size());
+      //  System.out.println("size: " + this.logReader.getStationIds().size());
         this.computeDifferences(false);
         this.writerAll.close();
         this.writerFiltered.close();
     }
     
+    public static  void runEntireWorkflow() throws IOException {
+    	  NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-03-2017.log");
+    	  networkController.neuralNetwork = new NeuralNetwork();
+        //  networkController.computeDifferences(true);
+          
+          networkController.runAdditionalLeaningSets();
+          
+         // networkController.testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
+
+          //int COUNT_LEARNING_RATE = 10;
+          //double[] learning_rates = {0, 0.01, 0.001, 0.0001, 0.00001};
+          //for(int j = 0; j < learning_rates.length; j++) {
+          
+          	//Constants.LEARN_RATE = learning_rates[j];
+          	
+  	        int COUNT = 1;
+  	        for(int i = 1; i <= COUNT; i++) {
+  	        	Constants.THRESHOLD = i * (double) 1 / COUNT;
+  	
+  	        	networkController.runTest();
+  	        }
+  	        
+  	       // System.out.println(Constants.LEARN_RATE + " " +  "best_threshold: " + best_threshold + " " + "best_accuracy: " + best_accuracy);
+          //}
+  	        
+    }
+    
     public static void main(String [] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {     
-        NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-03-2017.log");
-        networkController.computeDifferences(true);
+    	
+    	//int LEARNING_RATE_STEP = 15;
+    	// 0.22
+    	//double[] learning_rates = {0.2};
+    	//for(int i = 0; i < learning_rates.length; i++) {
+    	//	Constants.LEARN_RATE = learning_rates[i];//(double) i * 0.3 / LEARNING_RATE_STEP;
+    		runEntireWorkflow();
+    	//}
+    	
+    	//runEntireWorkflow();
         
-        networkController.runAdditionalLeaningSets();
-        
-        networkController.testSet("file:///var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result2.log");
-        //networkController.createNewLogs();
-        //networkController.testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
-        
-        /*networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
-        */
-       // networkController.logReader = new LogReader("file:///var/www/serverstore.ro/web/OCPP_Logs/ocpp_rest_result.log");
-        //networkController.logReader = new LogReader("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-02-2017.log");
-       /* networkController.logReader.read();
-        System.out.println("size: " + networkController.logReader.getStationIds().size());
-        networkController.computeDifferences(false);
-        networkController.writerAll.close();
-        networkController.writerFiltered.close();
-        */
-      /*  networkController.logReader = new LogReader("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_edited.txt");
-        networkController.logReader.read();
-        networkController.createNewLogs();
-        networkController.computeDifferences(false);
-        networkController.writerAll.close();
-        networkController.writerFiltered.close();
-        */
-        System.out.println("Results: ");
-        for(String station : networkController.countAllPerStation.keySet()) {
-            if(networkController.countAllWrittenPerStation.containsKey(station)) {
-                System.out.println(station + ": " + ((double) networkController.countAllWrittenPerStation.get(station) / networkController.countAllPerStation.get(station)));
-            }
-        }
-      
+        //networkController.runTest();
+    }
+    
+    public void runTest() throws IOException {
+    	
+    	createNewLogs();
+    	
+    	countAllPerStation.clear();
+    	countAllWrittenPerStation.clear();
+    	
+    	 testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
+    	
+         countAllPerStation.remove("SERVER");
+         countAllWrittenPerStation.remove("SERVER");
+         
+         List<String> allStations = new ArrayList<String>();
+         for(String station : countAllPerStation.keySet()) {
+        	 allStations.add(station);
+         }
+         
+         
+         String pickedStation = "RENOVA_0007";
+         
+         for(String station : allStations) {
+        	 if(!station.equals(pickedStation)) {
+        		 countAllPerStation.remove(station);
+                 countAllWrittenPerStation.remove(station);
+        	 }
+         }
+       
+         //System.out.println("count: " + count_BMX_hearbeats);
+         
+         //countAllPerStation.remove("LMS-11702190");
+         //countAllWrittenPerStation.remove("LMS-11702190");
+         
+         
+         int TP_TN = 0;
+         int TOTAL = 0;
+         
+         HashMap<String, Integer> truePositive = new HashMap<String, Integer>();
+         for(String station : countAllPerStation.keySet()) {
+         	truePositive.put(station, countAllPerStation.get(station));
+         }
+         
+         truePositive.put("RENOVA_0007", 0);
+       //  truePositive.put("BMX", 20);
+         //truePositive.put("RENOVA_0013", 91);
+         
+        // System.out.println("Results: ");
+         for(String station : countAllPerStation.keySet()) {
+             if(countAllWrittenPerStation.containsKey(station)) {
+             	TOTAL += countAllPerStation.get(station);
+             	TP_TN += countAllPerStation.get(station) - Math.abs(countAllWrittenPerStation.get(station) - truePositive.get(station));
+             //    System.out.println(station + ": " + ((double) countAllWrittenPerStation.get(station) / countAllPerStation.get(station)) + " " + countAllWrittenPerStation.get(station) + " / " + countAllPerStation.get(station));
+             }
+         }
+       
+         
+         if(((double) TP_TN / TOTAL) > best_accuracy) {
+        	 best_accuracy = (double) TP_TN / TOTAL;
+        	 best_threshold = Constants.THRESHOLD;
+         }
+         
+        /* if(TOTAL == 0) {
+         	 System.out.println(Constants.THRESHOLD + " " + 0);
+         } else {
+        	 System.out.println(Constants.THRESHOLD + " " + ((double) TP_TN / TOTAL));
+         }*/
     }
     
     public void initialize() {
@@ -156,7 +240,41 @@ public class NeuralNetworkController {
     */
     
     public void runAdditionalLeaningSets() {
-        
+    	/*
+    	for(int i = 1; i <= 10; i++) {
+            for(int j = 0; j < Utils.repetitiveTypes.length; j++) {
+            	for(int k = 0; k < Utils.allRequestTypes.length; k++) {
+            		NeuralNetInput netInput = new NeuralNetInput();
+            		 netInput.setLastTimeRequestPerc((double) 1 / i);
+                     netInput.setLastTimeStationRequestPerc((double) 1 / i);
+                     
+                     LinkedList<RequestType> requestSeq = new LinkedList<RequestType>();
+                     requestSeq.add(Utils.repetitiveTypes[j]);
+                     requestSeq.add(Utils.repetitiveTypes[j]);
+                     requestSeq.add(Utils.allRequestTypes[k]);
+                     
+                     netInput.setRequestSequence(requestSeq);
+                     netInput.setTarget(1);
+                     //System.out.println("1:" + netInput);
+                     neuralNetwork.processNode(netInput);
+                     
+                     
+                     netInput.setLastTimeRequestPerc((double) 1 / i);
+                     netInput.setLastTimeStationRequestPerc((double) 1 / i);
+                     
+                     requestSeq = new LinkedList<RequestType>();
+                     requestSeq.add(Utils.allRequestTypes[k]);
+                     requestSeq.add(Utils.repetitiveTypes[j]);
+                     requestSeq.add(Utils.repetitiveTypes[j]);
+                     
+                     netInput.setRequestSequence(requestSeq);
+                     netInput.setTarget(1);
+                     //System.out.println("1:" + netInput);
+                     neuralNetwork.processNode(netInput);
+            	}
+            }
+    	}
+        */
         for(int i = 1; i <= 10; i++) {
             for(int j = 0; j < Utils.invalidSequences.length; j++) {
                 for(int k = 0; k < Utils.allRequestTypes.length; k++) {
@@ -190,13 +308,36 @@ public class NeuralNetworkController {
                 }
             }
         }
+        
+        
     }
     
     public void computeDifferences(boolean isLearning) throws IOException {
+    	long _15_min = 15 * 60 * 1000;
+        long min = 1486677962000l;
+        long max = 1486763598000l;
+        
+        int[] trafficTimeFrame = new int[96];
+        
         while(!logReader.getOcppLogPairs().isEmpty()) {
+            
             
             RequestResponsePair currentPair = logReader.getOcppLogPairs().removeLast();
             if(!isLearning /*&& currentPair.getRequest().getStationId().equals(chargePoint)*/)  {
+            	if(currentPair.getRequest().getStationId().equals(chargePoint)) {
+            		if(min > currentPair.getRequest().getTime() ) { 
+            			min = currentPair.getRequest().getTime();
+            		} 
+            		if(max < currentPair.getRequest().getTime() ) { 
+            			max = currentPair.getRequest().getTime();
+            		} 
+            		int index = (int) ((currentPair.getRequest().getTime() - min) / _15_min);
+            		trafficTimeFrame[index]++;
+            		//System.out.println(currentPair.getRequest().getTime() - min);
+            	}
+            	/*if(currentPair.getRequest().getStationId().equals("RENOVA_0013") && currentPair.getRequest().getRequestType().equals(RequestType.Heartbeat)) {
+            		count_BMX_hearbeats++;
+            	}*/
                 if(!countAllPerStation.containsKey(currentPair.getRequest().getStationId())) {
                     countAllPerStation.put(currentPair.getRequest().getStationId(), 1);
                 } else {
@@ -274,7 +415,7 @@ public class NeuralNetworkController {
                     //    System.out.println((lastRequestResponsePair.getRequest().getTime() - start) + ", " + neuralNetInput.getTarget());
                     }
                     if(chargePoint.contains(lastRequestResponsePair.getRequest().getStationId())) {
-                    	System.out.println(lastRequestResponsePair.getRequest().getStationId() + ": " + lastRequestResponsePair.getRequest().getRequestType().getValue() + " " + neuralNetInput.getTarget());
+                 //   	System.out.println(lastRequestResponsePair.getRequest().getStationId() + ": " + lastRequestResponsePair.getRequest().getRequestType().getValue() + " " + neuralNetInput.getTarget());
                     } /*else if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
                     	System.out.println("+++++++++: " + neuralNetInput.getTarget());
                         	
@@ -315,7 +456,11 @@ public class NeuralNetworkController {
             
         }
         
-        neuralNetwork.printCurrentState();
+        for(int i = 0; i < trafficTimeFrame.length; i++) {
+        	System.out.println((_15_min * i) + " " + trafficTimeFrame[i]);
+        }
+        
+   //     neuralNetwork.printCurrentState();
     }
     
     /*

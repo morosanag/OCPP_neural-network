@@ -1,5 +1,6 @@
 package com.offnet.ocpp.network;
 
+import com.offnet.ocpp.general.Constants;
 import com.offnet.ocpp.general.Utils;
 import java.util.ArrayList;
 
@@ -12,13 +13,15 @@ public class NeuralNetwork {
 	double output_errors[];
 	double level1[][];
 	double level2[][];
-	double learn_rate = 0.5;
+	// 0.6
+	
 	
         public NeuralNetwork() {
             
         }
         
         void initialize(NeuralNetInput neuralNetInput) {
+        	System.out.println("init");
             initialize(NeuralNetInput.INPUT_SIZE, NeuralNetInput.HIDDEN_SIZE, NeuralNetInput.OUTPUT_SIZE);
         }
 	
@@ -61,7 +64,7 @@ public class NeuralNetwork {
 			outputs[i] = 0.05;
 		}
                 
-                printCurrentState();
+             //   printCurrentState();
 	}
         
         public void printCurrentState() {
@@ -171,7 +174,7 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             
             for(int i = 0; i < level2_temp.length; i++) {
                 for(int j = 0; j < level2_temp[0].length; j++) {
-                    level2_temp[i][j] = learn_rate * output_errors[j] * hiddens[i] + level2[i][j];
+                    level2_temp[i][j] = Constants.LEARN_RATE * output_errors[j] * hiddens[i] + level2[i][j];
                 }
             }
             
@@ -180,7 +183,7 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
                    // System.out.println("a1: " + level1[i][j] + " + " + (learn_rate * hiddens_errors[j] * inputs[i]));
                    // System.out.println("a2: " + (level1[i][j] + learn_rate * hiddens_errors[j] * inputs[i]));
                     
-                    level1_temp[i][j] = level1[i][j] + learn_rate * hiddens_errors[j] * inputs[i];
+                    level1_temp[i][j] = level1[i][j] + Constants.LEARN_RATE * hiddens_errors[j] * inputs[i];
                    // System.out.println("level1_temp[" + i + "][" + j + "]= " + level1_temp[i][j]);
                    // System.out.println("as: " + level1_temp[i][j] + " = " + (learn_rate * hiddens_errors[j] * inputs[i]) + " + " + level1[i][j]);
                 }
@@ -340,9 +343,9 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             }
             
             for(int i = 0; i < inputs.length; i++) {
-            	System.out.print(inputs[i] + " ");
+            //	System.out.print(inputs[i] + " ");
             }
-            System.out.println();
+            //System.out.println();
             
                 targets[0] = neuralNetInput.getTarget();
             
