@@ -44,7 +44,7 @@ public class NeuralNetInput {
     
     // neural network constants
     public static final int INPUT_SIZE = 5;
-    public static final int HIDDEN_SIZE = 3;
+    public static int HIDDEN_SIZE = 4;
     public static final int OUTPUT_SIZE = 1;
     
     public static HashMap<LinkedList<RequestType>, Double> sequencesMap = new HashMap<LinkedList<RequestType>, Double>();
@@ -53,6 +53,10 @@ public class NeuralNetInput {
     static double sum;
     
     public NeuralNetInput() {
+    	requestSequence = new LinkedList<RequestType>();
+    	sequencesMap.clear();
+    	count = 0;
+    	sum = 0;
         
     }
     

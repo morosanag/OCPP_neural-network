@@ -1,0 +1,18 @@
+BMX
+Authorize 206
+MeterValues 199
+Heartbeat 133
+StopTransaction 239
+StartTransaction 255
+StatusNotification 122
+BootNotification 177
+RENOVA_0007
+StopTransaction 8
+Authorize 1
+StartTransaction 8
+StatusNotification 18
+Heartbeat 130
+RENOVA_0013
+StatusNotification 11592
+BootNotification 30
+Heartbeat 45

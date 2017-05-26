@@ -166,6 +166,7 @@ public class LogReader {
         matherObj = patternObj.matcher(line);
         
         if(matherObj.find()) {
+        	//System.out.println(matherObj.group(0));
             ocppMessage.setMessageContent(new JSONObject(matherObj.group(0)));
         }
         

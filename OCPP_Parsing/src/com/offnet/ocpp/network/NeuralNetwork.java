@@ -21,7 +21,7 @@ public class NeuralNetwork {
         }
         
         void initialize(NeuralNetInput neuralNetInput) {
-        	System.out.println("init");
+        	//System.out.println("init");
             initialize(NeuralNetInput.INPUT_SIZE, NeuralNetInput.HIDDEN_SIZE, NeuralNetInput.OUTPUT_SIZE);
         }
 	
