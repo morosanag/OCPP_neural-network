@@ -1,6 +1,7 @@
 #!/bin/sh
 gnuplot << EOF
 set terminal svg 
+set key outside bot center horiz
 set output "$1.svg"
 set xlabel "$2"
 set ylabel "$3" 

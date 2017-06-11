@@ -21,6 +21,6 @@ public class Constants {
     // only for LMS-11702190
     //public static double THRESHOLD = 0.31;
     
-    public static double THRESHOLD = 0.18;
-    public static double LEARN_RATE = 0.2;
+    public static double THRESHOLD = 0.5;
+    public static double LEARN_RATE = 0.05;
 }

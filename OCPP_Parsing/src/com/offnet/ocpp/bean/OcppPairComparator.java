@@ -62,6 +62,9 @@ public class OcppPairComparator {
     }
     
     private double getStringSimilarity(OcppMessage message1, OcppMessage message2) {
+        if(message1 == null || message2 == null || message1.getMessageContent() == null || message2.getMessageContent() == null) {
+            return 0;
+        }
         String str1 = message1.getMessageContent().toString();
         String str2 = message2.getMessageContent().toString();
         
@@ -75,10 +78,25 @@ public class OcppPairComparator {
         double diffPercRequest = getStringSimilarity(requestResponsePair1.getRequest(), requestResponsePair2.getRequest());
         double diffPercResponse = getStringSimilarity(requestResponsePair1.getResponse(), requestResponsePair2.getResponse());
         
+        double length_prop = 0;
+        
+        try {
+        
+        length_prop = (double)(requestResponsePair1.getRequest().getMessageContent().toString().length() + 
+                requestResponsePair2.getRequest().getMessageContent().toString().length() + 
+                requestResponsePair1.getResponse().getMessageContent().toString().length() + 
+                requestResponsePair2.getResponse().getMessageContent().toString().length()) / 400; 
+                
+        } catch (NullPointerException ex) {
+            return 0;
+        }
+        
        // double diffPercTime = Math.abs(requestResponsePair1.getRequest().getTime() - requestResponsePair2.getRequest().getTime()) / maxTimeDiffInMillis;
        // diffPercTime = diffPercTime > 1 ? 1 : diffPercTime;
         
-        return (diffPercRequest + diffPercResponse)  / 2;
+       
+       
+        return (diffPercRequest + diffPercResponse)  / length_prop;
     }
     
 }

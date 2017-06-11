@@ -149,14 +149,23 @@ public class LogReader {
         patternObj = Pattern.compile(Constants.MESSAGE_PATTERN);
         matherObj = patternObj.matcher(line);
         
+        
         if(matherObj.find()) {
             String messageContent = matherObj.group(0);
             String[] messageFragments = messageContent.replace("[","").replace("]","").split(",");
-            ocppMessage.setMessageType(Integer.parseInt(messageFragments[0].trim()));
+            try {
+                ocppMessage.setMessageType(Integer.parseInt(messageFragments[0].trim()));
+            } catch (NumberFormatException ex) {
+                return;
+            }
             ocppMessage.setMessageId(messageFragments[1].trim().replace("\"", ""));
             
             if(ocppMessage.getMessageType() == 2) {
-                ocppMessage.setRequestType(RequestType.valueOf(messageFragments[2].replace("\"", "").trim()));
+                try {
+                    ocppMessage.setRequestType(RequestType.valueOf(messageFragments[2].replace("\"", "").trim()));
+                } catch (IllegalArgumentException ex) {
+                    return;
+                }
             }
         }
         

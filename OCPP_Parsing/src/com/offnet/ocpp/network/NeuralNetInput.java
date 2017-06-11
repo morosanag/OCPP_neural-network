@@ -62,8 +62,14 @@ public class NeuralNetInput {
     
     public NeuralNetInput(RequestResponsePair lastPair, RequestResponsePair currentPair, long lastTimeRequest, LogReader logReader) {
         OcppPairComparator ocppPairComparator = new OcppPairComparator(lastPair, currentPair);
-        target = ocppPairComparator.getSimilarityPercentage() * 10;
+        target = ocppPairComparator.getSimilarityPercentage() ;
         
+       /* if(target < 0.3) {
+            target = 0;
+        } else {
+            target = 1;
+        }
+       */ 
         try {
             if(currentPair.getResponse().isErrorResponse()) {
                 target /= 2;

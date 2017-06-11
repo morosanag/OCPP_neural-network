@@ -21,7 +21,6 @@ public class NeuralNetwork {
         }
         
         void initialize(NeuralNetInput neuralNetInput) {
-        	//System.out.println("init");
             initialize(NeuralNetInput.INPUT_SIZE, NeuralNetInput.HIDDEN_SIZE, NeuralNetInput.OUTPUT_SIZE);
         }
 	
@@ -64,7 +63,6 @@ public class NeuralNetwork {
 			outputs[i] = 0.05;
 		}
                 
-             //   printCurrentState();
 	}
         
         public void printCurrentState() {
@@ -339,7 +337,11 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
            // inputs[2] = neuralNetInput.getSequenceIndex(neuralNetInput.getRequestSequence());
             
             for(int i = 0; i < neuralNetInput.getRequestSequence().size(); i++) {
-            	inputs[1 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
+                try {
+                    inputs[1 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
+                } catch (NullPointerException ex) {
+                    return;
+                }
             }
             
             for(int i = 0; i < inputs.length; i++) {
@@ -350,7 +352,7 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
                 targets[0] = neuralNetInput.getTarget();
             
             if(!Utils.checkRequestSequence(neuralNetInput.getRequestSequence())) {
-                targets[0] /= 2;
+                targets[0] = 0;
             }
             
            // System.out.println("inputs:");
@@ -381,9 +383,6 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             inputs[1] = neuralNetInput.getLastTimeStationRequestPerc();
             
              for(int i = 0; i < neuralNetInput.getRequestSequence().size(); i++) {
-                // System.out.println("1: " + neuralNetInput.getRequestSequence());
-                // System.out.println("2: " + neuralNetInput.getRequestSequence().get(i));
-                 //System.out.println("3: " + neuralNetInput.getRequestSequence().get(i).getPriority());
                  if(neuralNetInput.getRequestSequence().get(i) != null) {
             	inputs[1 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
                  }

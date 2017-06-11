@@ -127,6 +127,10 @@ public class OcppMessage {
         }
         
         // StartTransaction
+        if(messageContent == null) {
+            return false;
+        }
+        
         if(messageContent.has("transactionId")) {
             if(messageContent.getInt("transactionId") == -1) {
                 return true;
