@@ -86,7 +86,7 @@ public class NeuralNetworkController {
     
     public static HashMap<StationRequest, Integer> countRequestTypePerStation = new HashMap<StationRequest, Integer>();
     
-    private final String chargePoint = "BMX RENOVA_0007 RENOVA_0013";
+    private final String chargePoint = "BMX";
     
     public void resetController(String urlString) throws UnsupportedEncodingException, FileNotFoundException {
         this.logReader = new LogReader(urlString);
@@ -132,9 +132,11 @@ public class NeuralNetworkController {
     
         SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
         Date startDate = formatter.parse("12-01-2016");
-        Date endDate = formatter.parse("12-31-2016");
+        Date endDate = formatter.parse("12-02-2016");
         
-        // Date endDate = formatter.parse("12-14-2016"); = best for RENOVA_0013
+        
+        
+        //Date endDate = formatter.parse("12-08-2016"); best date for RENOVA_0013
         
         Calendar start = Calendar.getInstance();
         start.setTime(startDate);
@@ -151,9 +153,9 @@ public class NeuralNetworkController {
             // Do your job here with `date`.
             System.out.print(sdfSource.format(date) + " ");
             
-            networkController.resetController("http://serverstore.ro/OCPP_Logs/ocpp_rest_" + sdfSource.format(date) + ".log");
+          //  networkController.resetController("http://serverstore.ro/OCPP_Logs/ocpp_rest_" + sdfSource.format(date) + ".log");
           
-            networkController.computeDifferences(true);
+        //    networkController.computeDifferences(true);
             
            networkController.runAdditionalLeaningSets();
             
@@ -163,20 +165,20 @@ public class NeuralNetworkController {
            best_accuracy = 0;
             
             
-            //int COUNT = 100;
-  	      //  for(int i = 1; i <= COUNT; i++) {
-  	        	Constants.THRESHOLD = 0.5; //i * (double) 1 / COUNT;
+            int COUNT = 100;
+  	        for(int i = 1; i <= COUNT; i++) {
+  	        	Constants.THRESHOLD = i * (double) 1 / COUNT;
   	
   	        	networkController.runTest();
-  	     //   }
+  	        }
   	        
-  	        System.out.println(best_accuracy);
+  	        System.out.println(best_threshold + ": " + best_accuracy);
         }
         
         
         
         networkController.neuralNetwork.printCurrentState();
-        networkController.runTest();
+     //   networkController.runTest();
         /*NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-03-2017.log");
     	  networkController.neuralNetwork = new NeuralNetwork();
 
@@ -241,8 +243,8 @@ public class NeuralNetworkController {
     	countAllPerStation.clear();
     	countAllWrittenPerStation.clear();
     	
-        
-    	testSet("file:///home/gabi/NetBeansProjects/OCPP_neural-networl_repo/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
+    	//testSet("file:///home/gabi/NetBeansProjects/OCPP_neural-networl_repo/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
+    	 testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
     	
          countAllPerStation.remove("SERVER");
          countAllWrittenPerStation.remove("SERVER");
@@ -253,7 +255,7 @@ public class NeuralNetworkController {
          }
          
          
-         String pickedStation = "RENOVA_0007";
+         String pickedStation = "BMX";
          
          for(String station : allStations) {
         	 if(!station.equals(pickedStation)) {
@@ -276,20 +278,23 @@ public class NeuralNetworkController {
          	truePositive.put(station, countAllPerStation.get(station));
          }
          
-        truePositive.put("RENOVA_0007", 0);
-      //   truePositive.put("BMX", 20);
-       //  truePositive.put("RENOVA_0013", 91);
+        //truePositive.put("RENOVA_0007", 141);
+         truePositive.put("BMX", 73);
+        // truePositive.put("RENOVA_0013", 152);
          
         // System.out.println("Results: ");
+        
+    //    System.out.println("x: " + countAllWrittenPerStation.get(pickedStation));
+        
          for(String station : countAllPerStation.keySet()) {
              if(countAllWrittenPerStation.containsKey(station)) {
              	TOTAL += countAllPerStation.get(station);
+             	//System.out.println(countAllWrittenPerStation.get(station));
              	TP_TN += countAllPerStation.get(station) - Math.abs(countAllWrittenPerStation.get(station) - truePositive.get(station));
-                // System.out.println(station + ": " + ((double) TP_TN / TOTAL) + " " + TP_TN + " / " + TOTAL);
+              //  System.out.println(station + ": " + ((double) TP_TN / TOTAL) + " " + TP_TN + " / " + TOTAL);
              }
          }
        
-         
          if(((double) TP_TN / TOTAL) > best_accuracy) {
         	 best_accuracy = (double) TP_TN / TOTAL;
         	 best_threshold = Constants.THRESHOLD;
@@ -301,7 +306,7 @@ public class NeuralNetworkController {
         //	 System.out.println(Constants.THRESHOLD + " " + ((double) TP_TN / TOTAL));
          }
          
-         closeLogs();
+     //    closeLogs();
     }
     
     public void initialize() {
@@ -479,12 +484,6 @@ public class NeuralNetworkController {
                         	
                     }*/
                     
-                    if(neuralNetInput.getTarget() > Constants.THRESHOLD) {
-                    //    neuralNetwork.processNode(neuralNetInput);
-                    //    if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
-                    //        System.out.println("2: " + lastRequestResponsePair.getRequest().getStationId() + " " + lastRequestResponsePair.getRequest().getTime() + ":\t" + neuralNetInput.getTarget());
-                    //    }
-                    }
                     
                     if(neuralNetInput.getTarget() > Constants.THRESHOLD /*&& currentPair.getRequest().getStationId().equals(chargePoint)*/) {
                         if(!countAllWrittenPerStation.containsKey(currentPair.getRequest().getStationId())) {
@@ -492,6 +491,7 @@ public class NeuralNetworkController {
                         } else {
                             countAllWrittenPerStation.put(currentPair.getRequest().getStationId(), countAllWrittenPerStation.get(currentPair.getRequest().getStationId()) + 1);
                         }
+                    //    System.out.println("a: " + countAllWrittenPerStation.get("RENOVA_0007"));
                         writeToFile(currentPair, writerFiltered);
                     }
                 }
