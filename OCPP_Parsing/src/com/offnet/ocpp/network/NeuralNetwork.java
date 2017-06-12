@@ -338,7 +338,7 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             
             for(int i = 0; i < neuralNetInput.getRequestSequence().size(); i++) {
                 try {
-                    inputs[1 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
+                    inputs[2 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
                 } catch (NullPointerException ex) {
                     return;
                 }
@@ -351,6 +351,8 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             
                 targets[0] = neuralNetInput.getTarget();
             
+          //  System.out.println(!Utils.checkRequestSequence(neuralNetInput.getRequestSequence()) + ": " + neuralNetInput.getRequestSequence());
+                
             if(!Utils.checkRequestSequence(neuralNetInput.getRequestSequence())) {
                 targets[0] = 0;
             }

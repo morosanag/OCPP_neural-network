@@ -29,6 +29,8 @@ import com.offnet.ocpp.parsing.LogReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
@@ -132,7 +134,7 @@ public class NeuralNetworkController {
     
         SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
         Date startDate = formatter.parse("12-01-2016");
-        Date endDate = formatter.parse("12-02-2016");
+        Date endDate = formatter.parse("06-01-2017");
         
         
         
@@ -149,35 +151,47 @@ public class NeuralNetworkController {
         networkController.neuralNetwork = new NeuralNetwork();
         //ocpp_rest_01-02-2017.log	
         for (Date date = start.getTime(); start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
-            Constants.THRESHOLD = 0.5;
+            Constants.THRESHOLD = 0.634;
             // Do your job here with `date`.
-            System.out.print(sdfSource.format(date) + " ");
+           // System.out.print(sdfSource.format(date) + " ");
             
-          //  networkController.resetController("http://serverstore.ro/OCPP_Logs/ocpp_rest_" + sdfSource.format(date) + ".log");
+           // networkController.resetController("http://serverstore.ro/OCPP_Logs/ocpp_rest_" + sdfSource.format(date) + ".log");
           
-        //    networkController.computeDifferences(true);
+           // networkController.computeDifferences(true);
             
            networkController.runAdditionalLeaningSets();
             
            // networkController.neuralNetwork.printCurrentState();
             
-           best_threshold = 0;
-           best_accuracy = 0;
-            
-            
-            int COUNT = 100;
-  	        for(int i = 1; i <= COUNT; i++) {
-  	        	Constants.THRESHOLD = i * (double) 1 / COUNT;
-  	
-  	        	networkController.runTest();
-  	        }
+           
+          
+          
   	        
-  	        System.out.println(best_threshold + ": " + best_accuracy);
+  	  //      System.out.println(best_threshold + ": " + best_accuracy);
+                
         }
-        
+        //networkController.runTest();
+         
+         //    System.out.println(best_threshold + ": " + best_accuracy);
+            
+            best_threshold = 0;
+           best_accuracy = 0;
+                //0.48 ACC: 0.7058823529411765
+         int COUNT = 100;
+  	        for(int i = 1; i <= COUNT; i++) {
+                        
+  	        	//Constants.THRESHOLD = (double) i * 1 / COUNT;
+                        //System.out.print(Constants.THRESHOLD);
+                        Constants.THRESHOLD = 0.48;
+                        networkController.runTest();
+  	        	
+  	        }
         
         
         networkController.neuralNetwork.printCurrentState();
+        
+        
+        System.out.println(best_threshold + " " + best_accuracy);
      //   networkController.runTest();
         /*NeuralNetworkController networkController = new NeuralNetworkController("http://serverstore.ro/OCPP_Logs/ocpp_rest_01-03-2017.log");
     	  networkController.neuralNetwork = new NeuralNetwork();
@@ -243,8 +257,8 @@ public class NeuralNetworkController {
     	countAllPerStation.clear();
     	countAllWrittenPerStation.clear();
     	
-    	//testSet("file:///home/gabi/NetBeansProjects/OCPP_neural-networl_repo/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
-    	 testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
+    	testSet("file:///home/gabi/NetBeansProjects/OCPP_neural-networl_repo/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
+    	 //testSet("file:///C:/Users/IBM_ADMIN/Desktop/ocpp_neural/OCPP_neural-network/OCPP_Parsing/ocpp_rest_result2.log");
     	
          countAllPerStation.remove("SERVER");
          countAllWrittenPerStation.remove("SERVER");
@@ -279,7 +293,7 @@ public class NeuralNetworkController {
          }
          
         //truePositive.put("RENOVA_0007", 141);
-         truePositive.put("BMX", 73);
+         truePositive.put("BMX", 67);
         // truePositive.put("RENOVA_0013", 152);
          
         // System.out.println("Results: ");
@@ -299,6 +313,8 @@ public class NeuralNetworkController {
         	 best_accuracy = (double) TP_TN / TOTAL;
         	 best_threshold = Constants.THRESHOLD;
          }
+         
+         System.out.println(" ACC: " + (double)(TP + TN) / TOTAL);
          
          if(TOTAL == 0) {
         //    System.out.println(Constants.THRESHOLD + " " + 0);
@@ -323,6 +339,31 @@ public class NeuralNetworkController {
     public void runAdditionalLeaningSets() {
 
         for(int i = 1; i <= 10; i++) {
+            for(int j = 0; j < Utils.allRequestTypes.length; j++) {
+                for(int k = 0; k < Utils.allRequestTypes.length; k++) {
+                    NeuralNetInput netInput = new NeuralNetInput();
+                    netInput.setLastTimeRequestPerc((double) 1 / i);
+                    netInput.setLastTimeStationRequestPerc((double) 1 / i);
+                    
+                    LinkedList<RequestType> requestSeq = new LinkedList<RequestType>();
+                    requestSeq.add(Utils.allRequestTypes[j]);
+                    requestSeq.add(Utils.allRequestTypes[k]);
+                    
+                    netInput.setRequestSequence(requestSeq);
+                    netInput.setTarget(1);
+                    
+                    neuralNetwork.processNode(netInput);
+                 
+                }
+            }
+        }
+        
+        
+    }
+    /*
+    public void runAdditionalLeaningSets() {
+
+        for(int i = 1; i <= 10; i++) {
             for(int j = 0; j < Utils.invalidSequences.length; j++) {
                 for(int k = 0; k < Utils.allRequestTypes.length; k++) {
                     NeuralNetInput netInput = new NeuralNetInput();
@@ -337,6 +378,7 @@ public class NeuralNetworkController {
                     netInput.setRequestSequence(requestSeq);
                     netInput.setTarget(1);
                     //System.out.println("1:" + netInput);
+                    
                     neuralNetwork.processNode(netInput);
                     
                     netInput = new NeuralNetInput();
@@ -358,6 +400,9 @@ public class NeuralNetworkController {
         
         
     }
+    */
+    
+    public int TP = 0, TN = 0;
     
     public void computeDifferences(boolean isLearning) throws IOException {
     	long _15_min = 15 * 60 * 1000;
@@ -366,11 +411,29 @@ public class NeuralNetworkController {
         
         int[] trafficTimeFrame = new int[96];
         LinkedList<RequestResponsePair> pairs = (LinkedList<RequestResponsePair>) logReader.getOcppLogPairs().clone();
+        Collections.sort(pairs, new Comparator<RequestResponsePair>() {
+            @Override
+            public int compare(RequestResponsePair o1, RequestResponsePair o2) {
+                if (o1.getResponse().getTime() < o2.getResponse().getTime()) return -1;
+                return -1;
+            }
+        });
+        TP = 0;
+        TN = 0;
        // System.out.println(pairs.size());
         while(!pairs.isEmpty()) {
             
-            RequestResponsePair currentPair = pairs.removeLast();
-            if(!isLearning /*&& currentPair.getRequest().getStationId().equals(chargePoint)*/)  {
+            
+            RequestResponsePair currentPair = pairs.removeFirst();
+             if(currentPair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
+            //System.out.println("\"" + currentPair.getRequest().getRequestType().toString() + "\",");
+             //    System.out.println(new Date(currentPair.getRequest().getTime()));
+            
+          //       System.out.println(new Date(currentPair.getRequest().getTime()));
+             }
+            
+            
+            if(!isLearning && currentPair.getRequest().getStationId().equals(chargePoint))  {
             	//System.out.println("1: " + currentPair);
             	//System.out.println("2: " + currentPair.getRequest());
             	//System.out.println("3: " + currentPair.getRequest().getStationId());
@@ -422,7 +485,7 @@ public class NeuralNetworkController {
                 lastRequestStation.put(currentPair.getRequest().getStationId(), currentPair.getRequest().getTime());
                 
                 LinkedList<RequestType> seqRequests = lastSeqRequestsStation.get(currentPair.getRequest().getStationId());
-                if(seqRequests.size() >= 3) {
+                if(seqRequests.size() >= 2) {
                 	seqRequests.removeLast();
                 }
                 seqRequests.addFirst(currentPair.getRequest().getRequestType());
@@ -473,19 +536,42 @@ public class NeuralNetworkController {
                     neuralNetwork.computeNode(neuralNetInput);
                     
                     long start = (long) 1483318133000.0;
-                    
+                   
                     if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
+                      //  System.out.println(neuralNetInput.getTarget() + currentPair.getRequest().getRequestType().toString());
+                 //     System.out.println(lastRequestResponsePair.getRequest().getStationId() + ": " + neuralNetInput.getTarget() + ": " +  neuralNetInput.getRequestSequence() + " " + new Date(currentPair.getRequest().getTime()));
+                      
                     //    System.out.println((lastRequestResponsePair.getRequest().getTime() - start) + ", " + neuralNetInput.getTarget());
                     }
+                    
+                    if(currentPair.getRequest().getStationId().equals(chargePoint)) {
+                    //    System.out.print(new Date(currentPair.getRequest().getTime()) + "  ");
+                    }
+                    
                     if(chargePoint.contains(lastRequestResponsePair.getRequest().getStationId())) {
-                 //   	System.out.println(lastRequestResponsePair.getRequest().getStationId() + ": " + lastRequestResponsePair.getRequest().getRequestType().getValue() + " " + neuralNetInput.getTarget());
-                    } /*else if(lastRequestResponsePair.getRequest().getStationId().equalsIgnoreCase(chargePoint)) {
-                    	System.out.println("+++++++++: " + neuralNetInput.getTarget());
-                        	
-                    }*/
+                   //     System.out.print(neuralNetInput.getRequestSequence() + ", " + neuralNetInput.getLastTimeRequestPerc() + ", " + neuralNetInput.getLastTimeStationRequestPerc() 
+                    //            + ": " + neuralNetInput.getTarget());
+                   //     System.out.println(neuralNetInput.getRequestSequence() + ": " + neuralNetInput.getTarget());
+              //          System.out.println(neuralNetInput.getRequestSequence());
+                //    	System.out.println(lastRequestResponsePair.getRequest().getStationId() + ": " + lastRequestResponsePair.getRequest().getRequestType().getValue() + " " + neuralNetInput.getTarget());
+                    } 
                     
                     
-                    if(neuralNetInput.getTarget() > Constants.THRESHOLD /*&& currentPair.getRequest().getStationId().equals(chargePoint)*/) {
+                    
+                    if(neuralNetInput.getTarget() > Constants.THRESHOLD && Utils.checkRequestSequence(neuralNetInput.getRequestSequence()) && currentPair.getRequest().getStationId().equals(chargePoint)) {
+                        TP++;
+                    //    System.out.println("\tTP");
+                    } else if(neuralNetInput.getTarget() < Constants.THRESHOLD && !Utils.checkRequestSequence(neuralNetInput.getRequestSequence()) && currentPair.getRequest().getStationId().equals(chargePoint)) {
+                        TN++;
+                   //     System.out.println("\tTN");
+                    } else if(currentPair.getRequest().getStationId().equals(chargePoint) && neuralNetInput.getTarget() > Constants.THRESHOLD) {
+                   //     System.out.println("\tFP");
+                    } else if(currentPair.getRequest().getStationId().equals(chargePoint) && neuralNetInput.getTarget() < Constants.THRESHOLD) {
+                   //     System.out.println("\tFN");
+                        
+                    }
+                    
+                    if(neuralNetInput.getTarget() > Constants.THRESHOLD && currentPair.getRequest().getStationId().equals(chargePoint)) {
                         if(!countAllWrittenPerStation.containsKey(currentPair.getRequest().getStationId())) {
                             countAllWrittenPerStation.put(currentPair.getRequest().getStationId(), 1);
                         } else {
@@ -499,7 +585,7 @@ public class NeuralNetworkController {
                 
             } else {
                 lastRequestTypeStation.put(currentStationRequestTypePair, currentPair);
-                if(!isLearning /*&& currentPair.getRequest().getStationId().equals(chargePoint)*/) {
+                if(!isLearning && currentPair.getRequest().getStationId().equals(chargePoint)) {
                     if(!countAllWrittenPerStation.containsKey(currentPair.getRequest().getStationId())) {
                         countAllWrittenPerStation.put(currentPair.getRequest().getStationId(), 1);
                     } else {

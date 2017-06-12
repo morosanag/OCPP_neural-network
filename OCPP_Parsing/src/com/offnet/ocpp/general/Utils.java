@@ -43,12 +43,12 @@ public class Utils {
             if(sequence.get(index) == null) {
                 return true;
             }
-            if(sequence.get(index).equals(invalidSequences[i][0]) && sequence.get(index + 1).equals(invalidSequences[i][1])) {
+            if(sequence.get(index).equals(invalidSequences[i][1]) && sequence.get(index + 1).equals(invalidSequences[i][0])) {
                 return false;
             }
         }
         
-        if(sequence.get(index).equals(RequestType.BootNotification) && !sequence.get(index + 1).equals(RequestType.StatusNotification)) {
+        if(!sequence.get(index).equals(RequestType.StatusNotification) && sequence.get(index + 1).equals(RequestType.BootNotification)) {
             return false;
         }
         
@@ -56,8 +56,8 @@ public class Utils {
     }
     
     public static boolean checkRequestSequence(LinkedList<RequestType> sequence) { 
-        if(sequence.size() < 3) return false;
-        return checkRequestSequence(sequence, 0) || checkRequestSequence(sequence, 1);
+        if(sequence.size() < 2) return false;
+        return checkRequestSequence(sequence, 0); // || checkRequestSequence(sequence, 1);
     }
     
     

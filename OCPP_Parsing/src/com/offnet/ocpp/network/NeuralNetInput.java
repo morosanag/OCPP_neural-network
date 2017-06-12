@@ -43,7 +43,7 @@ public class NeuralNetInput {
     private static final long MAX_STATION_REQUEST_TIME = 10 * 60 * 1000; // 10 minutes
     
     // neural network constants
-    public static final int INPUT_SIZE = 5;
+    public static final int INPUT_SIZE = 4;
     public static int HIDDEN_SIZE = 4;
     public static final int OUTPUT_SIZE = 1;
     
