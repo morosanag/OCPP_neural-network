@@ -324,7 +324,9 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
                 return outputs_temp;
         }
         
-        public void processNode(NeuralNetInput neuralNetInput) {
+        public static String targetsT = "";
+        
+        public void processNode(NeuralNetInput neuralNetInput, boolean debug) {
             if(level1 == null) {
                 initialize(neuralNetInput);
             }
@@ -357,6 +359,26 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
                 targets[0] = 0;
             }
             
+            if(debug) {
+           // 	System.out.println((int)targets[0]);
+            	//targetsT += (int)targets[0] + "\n";
+            	//System.out.println(targets[0]); 
+            }
+            
+            /*if(debug) {
+            	System.out.print("[");
+            	for(int i = 0; i < inputs.length; i++) {
+            		System.out.print(inputs[i] + " ");
+                }
+            	System.out.print("] ");
+            	
+            	System.out.print("[");
+            	for(int i = 0; i < targets.length; i++) {
+            		System.out.print(targets[i] + " ");
+                }
+            	System.out.println("] ");
+            }*/
+            
            // System.out.println("inputs:");
          /*   for(int i = 0; i < inputs.length; i++) {
                 System.out.print(inputs[i] + " ");
@@ -386,14 +408,14 @@ return (1/( 1 + Math.pow(Math.E,(-1*value))));
             
              for(int i = 0; i < neuralNetInput.getRequestSequence().size(); i++) {
                  if(neuralNetInput.getRequestSequence().get(i) != null) {
-            	inputs[1 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
+            	inputs[2 + i] = neuralNetInput.getRequestSequence().get(i).getPriority();
                  }
             }
                     
-                 targets[0] = neuralNetInput.getTarget();
+               //  targets[0] = neuralNetInput.getTarget();
             
             if(!Utils.checkRequestSequence(neuralNetInput.getRequestSequence())) {
-                targets[0] /= 2;
+             //   targets[0] /= 2;
             }
              
             targets = runSet(inputs);

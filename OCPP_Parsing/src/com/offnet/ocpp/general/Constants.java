@@ -22,5 +22,5 @@ public class Constants {
     //public static double THRESHOLD = 0.31;
     
     public static double THRESHOLD = 0.5;
-    public static double LEARN_RATE = 0.05;
+    public static double LEARN_RATE = 0.5;
 }

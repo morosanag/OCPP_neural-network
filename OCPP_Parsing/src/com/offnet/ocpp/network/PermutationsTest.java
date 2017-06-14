@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import com.offnet.ocpp.general.RequestType;
 
 public class PermutationsTest {
-
+/*
 	public static final int size = 3;
 	public static final int no_requests = 7;
 	public static double current_index = 0;
@@ -45,7 +45,7 @@ public class PermutationsTest {
 		System.out.println(step);
 		
 		permutations(new LinkedList<RequestType>(), list);
-	}*/
+	}
 	
 	 static int factorial(int n){    
 		  if (n == 0)    
@@ -324,5 +324,5 @@ public class PermutationsTest {
         public static void main(String [] args) {
             check();
         }
-	
+	*/
 }

@@ -19,16 +19,14 @@ public class Utils {
     
 	
 	
-    public static RequestType[][] invalidSequences = {{RequestType.StartTransaction, RequestType.Authorize},
-        {RequestType.StopTransaction, RequestType.Authorize},
-        {RequestType.StartTransaction, RequestType.StopTransaction},
-        {RequestType.StopTransaction, RequestType.StartTransaction},
+    public static RequestType[][] invalidSequences = {
+        {RequestType.StartTransaction, RequestType.StopTransaction}
+       /* {RequestType.StopTransaction, RequestType.StartTransaction},
         {RequestType.Authorize, RequestType.MeterValues},
         {RequestType.MeterValues, RequestType.StartTransaction},
         {RequestType.StopTransaction, RequestType.MeterValues},
-        {RequestType.Authorize, RequestType.StartTransaction},
         {RequestType.StartTransaction, RequestType.StartTransaction},
-        {RequestType.StopTransaction, RequestType.StopTransaction}     
+        {RequestType.StopTransaction, RequestType.StopTransaction}     */
     };
     
     public static RequestType[] repetitiveTypes = {RequestType.StatusNotification, RequestType.MeterValues};
@@ -48,9 +46,9 @@ public class Utils {
             }
         }
         
-        if(!sequence.get(index).equals(RequestType.StatusNotification) && sequence.get(index + 1).equals(RequestType.BootNotification)) {
+       /* if(!sequence.get(index).equals(RequestType.StatusNotification) && sequence.get(index + 1).equals(RequestType.BootNotification)) {
             return false;
-        }
+        }*/
         
         return true;
     }
